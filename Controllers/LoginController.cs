@@ -94,7 +94,7 @@ namespace FinanceManagementApp.Controllers
                                         SameSite = SameSiteMode.Strict
                                     };
                                     Response.Cookies.Append("jwtToken", jwtToken, cookieOptions);
-                                    return Redirect("/");
+                                    return RedirectToAction("FinanceOverview", "FinanceOverview");
                                 }
                                 else
                                 {

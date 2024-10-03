@@ -117,7 +117,7 @@ namespace FinanceManagementApp.Controllers
                 };
                 Response.Cookies.Append("jwtToken", jwtToken, cookieOptions);
 
-                return Ok(new { Message = "User created successfully" });
+                return RedirectToAction("FinanceOverview", "FinanceOverview");
 
             }
             catch (Exception ex) 
@@ -125,8 +125,6 @@ namespace FinanceManagementApp.Controllers
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("~/Views/App/SignUp.cshtml", user);
             }
-
-            return Redirect("/");
         }
     }
 }

@@ -40,6 +40,11 @@ namespace FinanceManagementApp
                 pattern: "login",
                 defaults: new { controller = "Login", action = "Login" });
 
+            app.MapControllerRoute(
+                name: "financeoverview",
+                pattern: "financeoverview",
+                defaults: new { controller = "FinanceOverview", action = "FinanceOverview" });
+
             app.Run();
         }
     }
