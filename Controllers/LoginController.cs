@@ -49,7 +49,7 @@ namespace FinanceManagementApp.Controllers
                 {
                     connection.Open();
 
-                    string findUserQuery = "SELECT TOP 1 user_email_address, user_password FROM users " +
+                    string findUserQuery = "SELECT TOP 1 user_id, user_email_address, user_password FROM users " +
                                            "WHERE user_email_address = @email_address ";
 
                     using (SqlCommand command = new SqlCommand(findUserQuery, connection))
@@ -60,6 +60,7 @@ namespace FinanceManagementApp.Controllers
                         {
                             if (reader.Read())
                             {
+                                int userId = Convert.ToInt32(reader["user_id"]);
                                 string hashedPassword = reader["user_password"].ToString();
 
                                 bool isPasswordCorrect = BCrypt.Net.BCrypt.Verify(password, hashedPassword);
@@ -75,7 +76,7 @@ namespace FinanceManagementApp.Controllers
                                     {
                                         Subject = new ClaimsIdentity(new[]
                                         {
-                                            new Claim("sub", email_address),
+                                            new Claim("sub", userId.ToString()),
                                             new Claim("email_address", email_address)
                                         }),
                                         Expires = DateTime.UtcNow.AddHours(2),
