@@ -1,10 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
 using FinanceManagementApp.Models;
 using System.Data.SqlClient;
-using System.Security.Claims;
 
 namespace FinanceManagementApp.Controllers
 {
@@ -12,22 +8,25 @@ namespace FinanceManagementApp.Controllers
     public class FinanceOverviewController : Controller
     {
         private readonly IConfiguration _configuration;
+        private readonly HandleToken _handleToken;
 
         public FinanceOverviewController(IConfiguration configuration)
         {
             _configuration = configuration;
+            _handleToken = new HandleToken(configuration);
         }
 
         public IActionResult FinanceOverview()
         {
             string jwtToken = Request.Cookies["jwtToken"];
+            bool isTokenValid = _handleToken.IsTokenValid(jwtToken);
 
-            if (!IsTokenValid(jwtToken))
+            if (!isTokenValid)
             {
                 return RedirectToAction("Login", "Login");
             }
 
-            var userId = ExtractIdFromToken(jwtToken);
+            var userId = _handleToken.ExtractIdFromToken(jwtToken);
 
             try
             {
@@ -45,16 +44,30 @@ namespace FinanceManagementApp.Controllers
                                              "AND @currentDate >= budget_start_date " +
                                              "AND @currentDate <= budget_end_date";
 
-                    using (SqlCommand command = new SqlCommand(findBudgetQuery, connection))
-                    {
-                        command.Parameters.AddWithValue("@user_id", userId);
-                        command.Parameters.AddWithValue("@currentDate", currentDate);
+                    string findIncomesQuery = "SELECT income_id, income_description, income_amount " +
+                                              "FROM incomes " +
+                                              "WHERE user_id = @user_id " +
+                                              "AND MONTH(transaction_date) = MONTH(GETDATE()) " +
+                                              "AND YEAR(transaction_date) = YEAR(GETDATE()) " +
+                                              "ORDER BY transaction_date DESC";
 
-                        using (SqlDataReader reader = command.ExecuteReader())
+                    string findExpensesQuery = "SELECT expense_id, expense_description, expense_amount " +
+                                               "FROM expenses " +
+                                               "WHERE user_id = @user_id " +
+                                               "AND MONTH(transaction_date) = MONTH(GETDATE()) " +
+                                               "AND YEAR(transaction_date) = YEAR(GETDATE()) " +
+                                               "ORDER BY transaction_date DESC";
+
+                    using (SqlCommand budgetCommand = new SqlCommand(findBudgetQuery, connection))
+                    {
+                        budgetCommand.Parameters.AddWithValue("@user_id", userId);
+                        budgetCommand.Parameters.AddWithValue("@currentDate", currentDate);
+
+                        using (SqlDataReader budgetReader = budgetCommand.ExecuteReader())
                         {
-                            if (reader.Read())
+                            if (budgetReader.Read())
                             {
-                                float budgetAmount = reader.GetFloat(0);
+                                float budgetAmount = budgetReader.GetFloat(0);
                                 ViewData["Budget"] = budgetAmount;
                             } else
                             {
@@ -62,64 +75,104 @@ namespace FinanceManagementApp.Controllers
                             }
                         }
                     }
+
+                    using (SqlCommand incomeCommand = new SqlCommand(findIncomesQuery, connection))
+                    {
+                        incomeCommand.Parameters.AddWithValue("@user_id", userId);
+
+                        using (SqlDataReader incomeReader = incomeCommand.ExecuteReader())
+                        {
+                            List<Income> incomes = new List<Income>();
+
+                            while (incomeReader.Read())
+                            {
+                                int incomeId = incomeReader.GetInt32(0);
+                                string incomeDescription = incomeReader.GetString(1);
+                                double incomeAmount = incomeReader.GetDouble(2);
+
+                                incomes.Add(new Income
+                                {
+                                    Id = incomeId,
+                                    Description = incomeDescription,
+                                    Amount = incomeAmount
+                                });
+                            }
+
+                            ViewData["Incomes"] = incomes;
+                        }
+                    }
+
+                    using (SqlCommand expenseCommand = new SqlCommand(findExpensesQuery, connection))
+                    {
+                        expenseCommand.Parameters.AddWithValue("@user_id", userId);
+
+                        using (SqlDataReader expenseReader = expenseCommand.ExecuteReader())
+                        {
+                            List<Expense> expenses = new List<Expense>();
+
+                            while (expenseReader.Read())
+                            {
+                                int expenseId = expenseReader.GetInt32(0);
+                                string expenseDescription = expenseReader.GetString(1);
+                                float expenseAmount = expenseReader.GetFloat(2);
+
+                                expenses.Add(new Expense
+                                {
+                                    Id = expenseId,
+                                    Description = expenseDescription,
+                                    Amount = expenseAmount
+                                });
+                            }
+
+                            ViewData["Expenses"] = expenses;
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
-                ViewData["ErrorMessage"] = ex.Message + " " + userId;
+                ViewData["ErrorMessage"] = ex.Message;
                 Console.WriteLine(ex.Message);
             }
 
             return View("~/Views/App/FinanceOverview.cshtml");
         }
 
-        private bool IsTokenValid(string token)
+        [HttpPost]
+        public IActionResult DeleteIncome(int id)
         {
             try
             {
-                if (string.IsNullOrEmpty(token))
+                string connectionString = _configuration["ConnectionStrings:DefaultConnection"];
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
                 {
-                    return false;
-                }
+                    connection.Open();
 
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var secretKey = _configuration["JwtSettings:SecretKey"];
-                var key = Encoding.UTF8.GetBytes(secretKey);
+                    string deleteIncomeQuery = "DELETE FROM incomes WHERE income_id = @income_id;";
 
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true
-                };
+                    using (SqlCommand command = new SqlCommand(deleteIncomeQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@income_id", id);
 
-                tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+                        int rowsAffected = command.ExecuteNonQuery();
 
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-
-        private int? ExtractIdFromToken(string token)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var jwtToken = tokenHandler.ReadToken(token) as JwtSecurityToken;
-
-            if (jwtToken != null)
-            {
-                var userIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "sub");
-
-                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
-                {
-                    return userId;
+                        if (rowsAffected  > 0)
+                        {
+                            TempData["SuccessMessage"] = "Income record deleted successfully";
+                        }
+                        else
+                        {
+                            TempData["ErrorMessage"] = "Failed to delete income record";
+                        }
+                    }
                 }
             }
-            return null;
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error deleting income: " + ex.Message;
+            }
+            return RedirectToAction("FinanceOverview");
         }
     }
 }
