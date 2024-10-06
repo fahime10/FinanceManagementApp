@@ -16,6 +16,7 @@ namespace FinanceManagementApp.Controllers
             _handleToken = new HandleToken(configuration);
         }
 
+        [HttpGet]
         public IActionResult FinanceOverview()
         {
             string jwtToken = Request.Cookies["jwtToken"];
@@ -48,15 +49,13 @@ namespace FinanceManagementApp.Controllers
                                               "FROM incomes " +
                                               "WHERE user_id = @user_id " +
                                               "AND MONTH(transaction_date) = MONTH(GETDATE()) " +
-                                              "AND YEAR(transaction_date) = YEAR(GETDATE()) " +
-                                              "ORDER BY transaction_date DESC";
+                                              "AND YEAR(transaction_date) = YEAR(GETDATE());";
 
                     string findExpensesQuery = "SELECT expense_id, expense_description, expense_amount " +
                                                "FROM expenses " +
                                                "WHERE user_id = @user_id " +
                                                "AND MONTH(transaction_date) = MONTH(GETDATE()) " +
-                                               "AND YEAR(transaction_date) = YEAR(GETDATE()) " +
-                                               "ORDER BY transaction_date DESC";
+                                               "AND YEAR(transaction_date) = YEAR(GETDATE());";
 
                     using (SqlCommand budgetCommand = new SqlCommand(findBudgetQuery, connection))
                     {
@@ -114,7 +113,7 @@ namespace FinanceManagementApp.Controllers
                             {
                                 int expenseId = expenseReader.GetInt32(0);
                                 string expenseDescription = expenseReader.GetString(1);
-                                float expenseAmount = expenseReader.GetFloat(2);
+                                double expenseAmount = expenseReader.GetDouble(2);
 
                                 expenses.Add(new Expense
                                 {
@@ -138,7 +137,7 @@ namespace FinanceManagementApp.Controllers
             return View("~/Views/App/FinanceOverview.cshtml");
         }
 
-        [HttpPost]
+        [HttpPost("deleteincome")]
         public IActionResult DeleteIncome(int id)
         {
             try
@@ -159,18 +158,55 @@ namespace FinanceManagementApp.Controllers
 
                         if (rowsAffected  > 0)
                         {
-                            TempData["SuccessMessage"] = "Income record deleted successfully";
+                            ViewData["SuccessMessage"] = "Income record deleted successfully";
                         }
                         else
                         {
-                            TempData["ErrorMessage"] = "Failed to delete income record";
+                            ViewData["ErrorMessage"] = "Failed to delete income record";
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Error deleting income: " + ex.Message;
+                ViewData["ErrorMessage"] = "Error deleting income: " + ex.Message;
+            }
+            return RedirectToAction("FinanceOverview");
+        }
+
+        [HttpPost("deleteexpense")]
+        public IActionResult DeleteExpense(int id)
+        {
+            try
+            {
+                string connectionString = _configuration["ConnectionStrings:DefaultConnection"];
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string deleteExpenseQuery = "DELETE FROM expenses WHERE expense_id = @expense_id;";
+
+                    using (SqlCommand command = new SqlCommand(deleteExpenseQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@expense_id", id);
+
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            ViewData["SuccessMessage"] = "Expense record deleted successfully";
+                        }
+                        else
+                        {
+                            ViewData["ErrorMessage"] = "Failed to delete expense record";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = "Error deleting expense: " + ex.Message;
             }
             return RedirectToAction("FinanceOverview");
         }

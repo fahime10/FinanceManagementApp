@@ -1,23 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using FinanceManagementApp.Models;
+﻿using FinanceManagementApp.Models;
+using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 
 namespace FinanceManagementApp.Controllers
 {
-    [Route("income")]
-    public class IncomeController : Controller
+    [Route("expense")]
+    public class ExpenseController : Controller
     {
         private readonly IConfiguration _configuration;
         private readonly HandleToken _handleToken;
 
-        public IncomeController(IConfiguration configuration)
+        public ExpenseController(IConfiguration configuration)
         {
             _configuration = configuration;
             _handleToken = new HandleToken(configuration);
         }
 
         [HttpGet("addnew")]
-        public IActionResult AddNewIncomeForm()
+        public IActionResult AddNewExpenseForm()
         {
             string jwtToken = Request.Cookies["jwtToken"];
             bool isTokenValid = _handleToken.IsTokenValid(jwtToken);
@@ -27,11 +27,11 @@ namespace FinanceManagementApp.Controllers
                 return RedirectToAction("Login", "Login");
             }
 
-            return View("~/Views/App/AddNewIncomeForm.cshtml", new Income());
+            return View("~/Views/App/AddNewExpenseForm.cshtml", new Expense());
         }
 
         [HttpPost]
-        public IActionResult AddNewIncome(string description, double amount)
+        public IActionResult AddNewExpense(string description, double amount)
         {
             string jwtToken = Request.Cookies["jwtToken"];
             bool isTokenValid = _handleToken.IsTokenValid(jwtToken);
@@ -47,7 +47,7 @@ namespace FinanceManagementApp.Controllers
 
             DateTime currentDate = DateTime.Now;
 
-            Income income = new Income
+            Expense expense = new Expense
             {
                 UserId = Convert.ToInt32(userId),
                 Description = description,
@@ -58,7 +58,7 @@ namespace FinanceManagementApp.Controllers
             if (string.IsNullOrEmpty(description) || amount == 0)
             {
                 ViewData["ErrorMessage"] = "All fields are required";
-                return View("~/Views/App/AddNewIncomeForm.cshtml", income);
+                return View("~/Views/App/AddNewExpenseForm.cshtml", expense);
             }
 
             try
@@ -69,16 +69,16 @@ namespace FinanceManagementApp.Controllers
                 {
                     connection.Open();
 
-                    string saveNewIncome = "INSERT INTO incomes " +
-                                           "(user_id, income_description, income_amount, transaction_date) VALUES " +
-                                           "(@user_id, @description, @amount, @transaction_date);";
+                    string saveNewExpense = "INSERT INTO expenses " +
+                                            "(user_id, expense_description, expense_amount, transaction_date) VALUES " +
+                                            "(@user_id, @description, @amount, @transaction_date);";
 
-                    using (SqlCommand command = new SqlCommand(saveNewIncome, connection))
+                    using (SqlCommand command = new SqlCommand(saveNewExpense, connection))
                     {
-                        command.Parameters.AddWithValue("@user_id", income.UserId);
-                        command.Parameters.AddWithValue("@description", income.Description);
-                        command.Parameters.AddWithValue("@amount", income.Amount);
-                        command.Parameters.AddWithValue("@transaction_date", income.TransactionDate);
+                        command.Parameters.AddWithValue("@user_id", expense.UserId);
+                        command.Parameters.AddWithValue("@description", expense.Description);
+                        command.Parameters.AddWithValue("@amount", expense.Amount);
+                        command.Parameters.AddWithValue("@transaction_date", expense.TransactionDate);
 
                         command.ExecuteNonQuery();
                     }
@@ -91,7 +91,7 @@ namespace FinanceManagementApp.Controllers
             catch (Exception ex)
             {
                 ViewData["ErrorMessage"] = ex.Message;
-                return View("~/Views/App/AddNewIncomeForm.cshtml", income);
+                return View("~/Views/App/AddNewExpenseForm.cshtml", expense);
             }
         }
     }

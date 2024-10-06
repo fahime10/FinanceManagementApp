@@ -50,6 +50,11 @@ namespace FinanceManagementApp
                 pattern: "income/addnew",
                 defaults: new { controller = "Income", action = "AddNewIncomeForm" });
 
+            app.MapControllerRoute(
+                name: "addnewexpense",
+                pattern: "expense/addnew",
+                defaults: new { controller = "Expense", action = "AddNewExpenseForm" });
+
             app.Run();
         }
     }
