@@ -34,8 +34,7 @@ CREATE TABLE budgets (
 	budget_id INT NOT NULL PRIMARY KEY IDENTITY,
 	user_id INT NOT NULL,
 	budget_amount FLOAT NOT NULL,
-	budget_start_date DATETIME NULL,
-	budget_end_date DATETIME NULL,
+	budget_created_at DATETIME NOT NULL,
 	CONSTRAINT budget_user FOREIGN KEY (user_id)
 		REFERENCES users(user_id)
 		ON DELETE CASCADE

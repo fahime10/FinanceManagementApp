@@ -11,10 +11,12 @@
             <p>Current budget: @ViewData["Budget"]</p>
         </div>
         <div class="col">
-            <button class="btn btn-primary">Set new budget</button>
+            <a href="@Url.Action("BudgetForm", "Budget")" class="btn btn-primary">Set budget</a>
         </div>
         <div class="col">
-            <button class="btn btn-primary">Remove budget</button>
+            <form action="@Url.Action("DeleteBudget", new { id = ViewData["BudgetId"] })" method="POST" style="display:inline-block;">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete the current budget?');">Delete</button>
+            </form>
         </div>
     </div>
     <div class="row">

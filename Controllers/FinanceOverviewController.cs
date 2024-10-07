@@ -39,11 +39,11 @@ namespace FinanceManagementApp.Controllers
 
                     DateTime currentDate = DateTime.Now;
 
-                    string findBudgetQuery = "SELECT TOP 1 budget_amount " +
+                    string findBudgetQuery = "SELECT TOP 1 budget_id, budget_amount " +
                                              "FROM budgets " +
                                              "WHERE user_id = @user_id " +
-                                             "AND @currentDate >= budget_start_date " +
-                                             "AND @currentDate <= budget_end_date";
+                                             "AND MONTH(budget_created_at) = MONTH(GETDATE()) " +
+                                             "AND YEAR(budget_created_at) = YEAR(GETDATE())";
 
                     string findIncomesQuery = "SELECT income_id, income_description, income_amount " +
                                               "FROM incomes " +
@@ -60,17 +60,18 @@ namespace FinanceManagementApp.Controllers
                     using (SqlCommand budgetCommand = new SqlCommand(findBudgetQuery, connection))
                     {
                         budgetCommand.Parameters.AddWithValue("@user_id", userId);
-                        budgetCommand.Parameters.AddWithValue("@currentDate", currentDate);
 
                         using (SqlDataReader budgetReader = budgetCommand.ExecuteReader())
                         {
                             if (budgetReader.Read())
                             {
-                                float budgetAmount = budgetReader.GetFloat(0);
+                                double budgetAmount = budgetReader.GetDouble(1);
+                                ViewData["BudgetId"] = budgetReader.GetInt32(0);
                                 ViewData["Budget"] = budgetAmount;
                             } else
                             {
                                 ViewData["Budget"] = "Not set";
+                                ViewData["BudgetId"] = null;
                             }
                         }
                     }
@@ -207,6 +208,45 @@ namespace FinanceManagementApp.Controllers
             catch (Exception ex)
             {
                 ViewData["ErrorMessage"] = "Error deleting expense: " + ex.Message;
+            }
+            return RedirectToAction("FinanceOverview");
+        }
+
+        [HttpPost("deletebudget")]
+        public IActionResult DeleteBudget(int id)
+        {
+            try
+            {
+                string connectionString = _configuration["ConnectionStrings:DefaultConnection"];
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string deleteBudgetQuery = "DELETE FROM budgets WHERE budget_id = @budget_id;";
+
+                    using (SqlCommand command = new SqlCommand(deleteBudgetQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@budget_id", id);
+
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            ViewData["SuccessMessage"] = "Budget record deleted successfully";
+                            ViewData["Budget"] = "Not set";
+                            ViewData["BudgetId"] = null;
+                        }
+                        else
+                        {
+                            ViewData["ErrorMessage"] = "Failed to delete budget record";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = "Error deleting budget: " + ex.Message;
             }
             return RedirectToAction("FinanceOverview");
         }

@@ -55,6 +55,11 @@ namespace FinanceManagementApp
                 pattern: "expense/addnew",
                 defaults: new { controller = "Expense", action = "AddNewExpenseForm" });
 
+            app.MapControllerRoute(
+                name: "setbudget",
+                pattern: "setbudget",
+                defaults: new { controller = "Budget", action = "BudgetForm" });
+
             app.Run();
         }
     }
