@@ -138,6 +138,12 @@ namespace FinanceManagementApp.Controllers
             return View("~/Views/App/FinanceOverview.cshtml");
         }
 
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("jwtToken");
+            return RedirectToAction("Index", "Home");
+        }
+
         [HttpPost("deleteincome")]
         public IActionResult DeleteIncome(int id)
         {

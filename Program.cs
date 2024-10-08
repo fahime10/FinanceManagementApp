@@ -70,6 +70,11 @@ namespace FinanceManagementApp
                 pattern: "setbudget",
                 defaults: new { controller = "Budget", action = "BudgetForm" });
 
+            app.MapControllerRoute(
+                name: "edituser",
+                pattern: "edituserform",
+                defaults: new { controller = "User", action = "EditUserForm" });
+
             app.Run();
         }
     }
