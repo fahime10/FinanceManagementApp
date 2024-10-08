@@ -30,7 +30,7 @@ namespace FinanceManagementApp.Controllers
             return View("~/Views/App/AddNewIncomeForm.cshtml", new Income());
         }
 
-        [HttpPost]
+        [HttpPost("addnew")]
         public IActionResult AddNewIncome(string description, double amount)
         {
             string jwtToken = Request.Cookies["jwtToken"];
@@ -92,6 +92,126 @@ namespace FinanceManagementApp.Controllers
             {
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("~/Views/App/AddNewIncomeForm.cshtml", income);
+            }
+        }
+
+        [HttpGet("editincome/{id}")]
+        public IActionResult EditIncomeForm(int id)
+        {
+            string jwtToken = Request.Cookies["jwtToken"];
+            bool isTokenValid = _handleToken.IsTokenValid(jwtToken);
+
+            if (!isTokenValid)
+            {
+                return RedirectToAction("Login", "Login");
+            }
+
+            var userId = _handleToken.ExtractIdFromToken(jwtToken);
+
+            try
+            {
+                string connectionString = _configuration["ConnectionStrings:DefaultConnection"];
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string findIncomeQuery = "SELECT TOP 1 income_description, income_amount " +
+                                             "FROM incomes " +
+                                             "WHERE income_id=@income_id " +
+                                             "AND user_id=@user_id " +
+                                             "AND MONTH(transaction_date) = MONTH(GETDATE()) " +
+                                             "AND YEAR(transaction_date) = YEAR(GETDATE());";
+
+                    using (SqlCommand command = new SqlCommand(findIncomeQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@income_id", id);
+                        command.Parameters.AddWithValue("@user_id", userId);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                Income income = new Income
+                                {
+                                    Id = id,
+                                    Description = reader.GetString(0),
+                                    Amount = reader.GetDouble(reader.GetOrdinal("income_amount"))
+                                };
+
+                                return View("~/Views/App/EditIncomeForm.cshtml", income);
+                            } 
+                            else
+                            {
+                                ViewData["ErrorMessage"] = "Error trying to update income...";
+                                return RedirectToAction("FinanceOverview", "FinanceOverview");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("FinanceOverview", "FinanceOverview");
+            }
+        }
+
+        [HttpPost("editincome")]
+        public IActionResult EditIncome(int id, string description, double amount)
+        {
+            string jwtToken = Request.Cookies["jwtToken"];
+            bool isTokenValid = _handleToken.IsTokenValid(jwtToken);
+
+            if (!isTokenValid)
+            {
+                return RedirectToAction("Login", "Login");
+            }
+
+            double roundedAmount = Math.Floor(amount * 100) / 100;
+
+            Income income = new Income
+            {
+                Id = id,
+                Description = description,
+                Amount = roundedAmount
+            };
+
+            if (string.IsNullOrEmpty(description) ||
+                amount == 0)
+            {
+                ViewData["ErrorMessage"] = "All fields are required";
+                return View("~/Views/App/EditIncomeForm.cshtml", income);
+            }
+
+            try
+            {
+                string connectionString = _configuration["ConnectionStrings:DefaultConnection"];
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string editIncomeQuery = "UPDATE incomes " +
+                                             "SET income_description=@description, income_amount=@amount " +
+                                             "WHERE income_id=@id;";
+
+                    using (SqlCommand command = new SqlCommand(editIncomeQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@description", income.Description);
+                        command.Parameters.AddWithValue("@amount", income.Amount);
+                        command.Parameters.AddWithValue("@id", income.Id);
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+
+                return RedirectToAction("FinanceOverview", "FinanceOverview");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("~Views/App/EditIncomeForm.cshtml", income);
             }
         }
     }

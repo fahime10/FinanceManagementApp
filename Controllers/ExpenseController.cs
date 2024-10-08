@@ -30,7 +30,7 @@ namespace FinanceManagementApp.Controllers
             return View("~/Views/App/AddNewExpenseForm.cshtml", new Expense());
         }
 
-        [HttpPost]
+        [HttpPost("addnew")]
         public IActionResult AddNewExpense(string description, double amount)
         {
             string jwtToken = Request.Cookies["jwtToken"];
@@ -92,6 +92,126 @@ namespace FinanceManagementApp.Controllers
             {
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("~/Views/App/AddNewExpenseForm.cshtml", expense);
+            }
+        }
+
+        [HttpGet("editexpense/{id}")]
+        public IActionResult EditExpenseForm(int id)
+        {
+            string jwtToken = Request.Cookies["jwtToken"];
+            bool isTokenValid = _handleToken.IsTokenValid(jwtToken);
+
+            if (!isTokenValid)
+            {
+                return RedirectToAction("Login", "Login");
+            }
+
+            var userId = _handleToken.ExtractIdFromToken(jwtToken);
+
+            try
+            {
+                string connectionString = _configuration["ConnectionStrings:DefaultConnection"];
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string findExpenseQuery = "SELECT TOP 1 expense_description, expense_amount " +
+                                             "FROM expenses " +
+                                             "WHERE expense_id=@expense_id " +
+                                             "AND user_id=@user_id " +
+                                             "AND MONTH(transaction_date) = MONTH(GETDATE()) " +
+                                             "AND YEAR(transaction_date) = YEAR(GETDATE());";
+
+                    using (SqlCommand command = new SqlCommand(findExpenseQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@expense_id", id);
+                        command.Parameters.AddWithValue("@user_id", userId);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                Expense expense = new Expense
+                                {
+                                    Id = id,
+                                    Description = reader.GetString(0),
+                                    Amount = reader.GetDouble(reader.GetOrdinal("expense_amount"))
+                                };
+
+                                return View("~/Views/App/EditExpenseForm.cshtml", expense);
+                            }
+                            else
+                            {
+                                ViewData["ErrorMessage"] = "Error trying to update expense...";
+                                return RedirectToAction("FinanceOverview", "FinanceOverview");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("FinanceOverview", "FinanceOverview");
+            }
+        }
+
+        [HttpPost("editexpense")]
+        public IActionResult EditIncome(int id, string description, double amount)
+        {
+            string jwtToken = Request.Cookies["jwtToken"];
+            bool isTokenValid = _handleToken.IsTokenValid(jwtToken);
+
+            if (!isTokenValid)
+            {
+                return RedirectToAction("Login", "Login");
+            }
+
+            double roundedAmount = Math.Floor(amount * 100) / 100;
+
+            Expense expense = new Expense
+            {
+                Id = id,
+                Description = description,
+                Amount = roundedAmount
+            };
+
+            if (string.IsNullOrEmpty(description) ||
+                amount == 0)
+            {
+                ViewData["ErrorMessage"] = "All fields are required";
+                return View("~/Views/App/EditExpenseForm.cshtml", expense);
+            }
+
+            try
+            {
+                string connectionString = _configuration["ConnectionStrings:DefaultConnection"];
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string editExpenseQuery = "UPDATE expenses " +
+                                              "SET expense_description=@description, expense_amount=@amount " +
+                                              "WHERE expense_id=@id;";
+
+                    using (SqlCommand command = new SqlCommand(editExpenseQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@description", expense.Description);
+                        command.Parameters.AddWithValue("@amount", expense.Amount);
+                        command.Parameters.AddWithValue("@id", expense.Id);
+
+                        command.ExecuteNonQuery();
+                    }
+                }
+
+                return RedirectToAction("FinanceOverview", "FinanceOverview");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("~Views/App/EditExpenseForm.cshtml", expense);
             }
         }
     }

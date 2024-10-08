@@ -51,9 +51,19 @@ namespace FinanceManagementApp
                 defaults: new { controller = "Income", action = "AddNewIncomeForm" });
 
             app.MapControllerRoute(
+                name: "editincome",
+                pattern: "income/editincome/{id}",
+                defaults: new { controller = "Income", action = "EditIncomeForm" });
+
+            app.MapControllerRoute(
                 name: "addnewexpense",
                 pattern: "expense/addnew",
                 defaults: new { controller = "Expense", action = "AddNewExpenseForm" });
+
+            app.MapControllerRoute(
+                name: "editexpense",
+                pattern: "expense/editexpense/{id}",
+                defaults: new { controller = "Expense", action = "EditExpenseForm" });
 
             app.MapControllerRoute(
                 name: "setbudget",

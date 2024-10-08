@@ -43,10 +43,10 @@ namespace FinanceManagementApp.Controllers
                     connection.Open();
 
                     string findBudgetQuery = "SELECT TOP 1 budget_amount " +
-                                        "FROM budgets " +
-                                        "WHERE user_id = @user_id " +
-                                        "AND MONTH(budget_created_at) = MONTH(GETDATE()) " +
-                                        "AND YEAR(budget_created_at) = YEAR(GETDATE())";
+                                             "FROM budgets " +
+                                             "WHERE user_id = @user_id " +
+                                             "AND MONTH(budget_created_at) = MONTH(GETDATE()) " +
+                                             "AND YEAR(budget_created_at) = YEAR(GETDATE())";
 
                     using (SqlCommand command = new SqlCommand(findBudgetQuery, connection))
                     {
@@ -112,10 +112,10 @@ namespace FinanceManagementApp.Controllers
                     connection.Open();
 
                     string findBudgetQuery = "SELECT TOP 1 budget_amount " +
-                                        "FROM budgets " +
-                                        "WHERE user_id = @user_id " +
-                                        "AND MONTH(budget_created_at) = MONTH(GETDATE()) " +
-                                        "AND YEAR(budget_created_at) = YEAR(GETDATE())";
+                                             "FROM budgets " +
+                                             "WHERE user_id = @user_id " +
+                                             "AND MONTH(budget_created_at) = MONTH(GETDATE()) " +
+                                             "AND YEAR(budget_created_at) = YEAR(GETDATE())";
 
                     using (SqlCommand findBudgetCommand = new SqlCommand(findBudgetQuery, connection))
                     {
@@ -132,8 +132,8 @@ namespace FinanceManagementApp.Controllers
                         if (!foundBudget)
                         {
                             string setBudgetQuery = "INSERT INTO budgets " +
-                                           "(user_id, budget_amount, budget_created_at) VALUES " +
-                                           "(@user_id, @amount, @created_at);";
+                                                    "(user_id, budget_amount, budget_created_at) VALUES " +
+                                                    "(@user_id, @amount, @created_at);";
 
                             using (SqlCommand newBudgetCommand = new SqlCommand(setBudgetQuery, connection))
                             {
@@ -148,10 +148,10 @@ namespace FinanceManagementApp.Controllers
                         else
                         {
                             string setBudgetQuery = "UPDATE budgets " +
-                                               "SET budget_amount=@amount " +
-                                               "WHERE user_id=@user_id " +
-                                               "AND MONTH(budget_created_at) = MONTH(GETDATE()) " +
-                                               "AND YEAR(budget_created_at) = YEAR(GETDATE());";
+                                                    "SET budget_amount=@amount " +
+                                                    "WHERE user_id=@user_id " +
+                                                    "AND MONTH(budget_created_at) = MONTH(GETDATE()) " +
+                                                    "AND YEAR(budget_created_at) = YEAR(GETDATE());";
 
                             using (SqlCommand setBudgetCommand = new SqlCommand(setBudgetQuery, connection))
                             {
