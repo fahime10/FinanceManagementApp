@@ -37,11 +37,11 @@ namespace FinanceManagementApp.Controllers
                 {
                     connection.Open();
 
-                    string findUser = "SELECT TOP 1 user_first_name, user_last_name, user_email_address " +
+                    string findUserQuery = "SELECT TOP 1 user_first_name, user_last_name, user_email_address " +
                                       "FROM users " +
                                       "WHERE user_id=@user_id";
 
-                    using (SqlCommand command = new SqlCommand(findUser, connection))
+                    using (SqlCommand command = new SqlCommand(findUserQuery, connection))
                     {
                         command.Parameters.AddWithValue("@user_id", userId);
 
@@ -108,11 +108,11 @@ namespace FinanceManagementApp.Controllers
                 {
                     connection.Open();
 
-                    string findUser = "UPDATE users " +
+                    string findUserQuery = "UPDATE users " +
                                       "SET user_first_name=@first_name, user_last_name=@last_name, user_email_address=@email_address " +
                                       "WHERE user_id=@user_id;";
 
-                    using (SqlCommand command = new SqlCommand(findUser, connection))
+                    using (SqlCommand command = new SqlCommand(findUserQuery, connection))
                     {
                         command.Parameters.AddWithValue("@first_name", user.FirstName);
                         command.Parameters.AddWithValue("@last_name", user.LastName);

@@ -1,0 +1,64 @@
+﻿@model FinanceManagementApp.Models.User
+
+@{
+    ViewData["Title"] = "Forgotten passcode";
+}
+
+<h2>Forgotten password</h2>
+
+@if (ViewData["ErrorMessage"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>@ViewData["ErrorMessage"]</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (!(ViewData["IsEmailVerified"] as bool? ?? false))
+{
+    <form method="POST" action="@Url.Action("VerifyEmail", "Login")">
+        <div class="row mb-3">
+            <label class="col-sm-3 col-form-label">Please enter the email address you used to create the account:</label>
+            <div class="col-sm-6">
+                <input type="email" class="form-control" name="email_address" value="@Model.EmailAddress" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="offset-sm-3 col-sm-3 d-grid">
+                <button type="submit" class="btn btn-primary">Verify email</button>
+            </div>
+        </div>
+    </form>
+}
+else
+{
+    <form method="POST" action="@Url.Action("ResetPassword", "Login")">
+        <input type="hidden" class="form-control" name="email_address" value="@Model.EmailAddress" />
+        <div class="row mb-3">
+            <label class="col-sm-3 col-form-label">Enter passcode:</label>
+            <div class="col-sm-6">
+                <input type="text" class="form-control" name="passcode" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <label class="col-sm-3 col-form-label">Password:</label>
+            <div class="col-sm-6">
+                <input type="password" class="form-control" name="password" value="@Model.Password" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <label class="col-sm-3 col-form-label">Confirm password:</label>
+            <div class="col-sm-6">
+                <input type="password" class="form-control" name="confirm_password" />
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="offset-sm-3 col-sm-3 d-grid">
+                <button type="submit" class="btn btn-primary">Set new password</button>
+            </div>
+            <div class="col-sm-3 d-grid">
+                <a class="btn btn-outline-primary" href="@Url.Action("LoginForm", "Login")" role="button">Cancel</a>
+            </div>
+        </div>
+    </form>
+}

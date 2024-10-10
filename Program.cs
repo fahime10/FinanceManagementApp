@@ -75,6 +75,11 @@ namespace FinanceManagementApp
                 pattern: "edituserform",
                 defaults: new { controller = "User", action = "EditUserForm" });
 
+            app.MapControllerRoute(
+                name: "passcoderequestform",
+                pattern: "passcoderequestform",
+                defaults: new { controller = "Login", action = "PasscodeRequestForm" });
+
             app.Run();
         }
     }

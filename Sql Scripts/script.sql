@@ -3,7 +3,8 @@ CREATE TABLE users (
 	user_first_name VARCHAR (20) NOT NULL,
 	user_last_name VARCHAR (20) NOT NULL,
 	user_email_address VARCHAR (50) NOT NULL UNIQUE,
-	user_password VARCHAR (256) NOT NULL
+	user_password VARCHAR (256) NOT NULL,
+	user_passcode VARCHAR (8) NULL
 );
 
 CREATE TABLE incomes (

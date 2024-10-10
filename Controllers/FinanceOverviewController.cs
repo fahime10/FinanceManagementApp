@@ -21,6 +21,9 @@ namespace FinanceManagementApp.Controllers
         {
             string jwtToken = Request.Cookies["jwtToken"];
             bool isTokenValid = _handleToken.IsTokenValid(jwtToken);
+            double budget = 0;
+            double incomesTotal = 0;
+            double expensesTotal = 0;
 
             if (!isTokenValid)
             {
@@ -68,6 +71,7 @@ namespace FinanceManagementApp.Controllers
                                 double budgetAmount = budgetReader.GetDouble(1);
                                 ViewData["BudgetId"] = budgetReader.GetInt32(0);
                                 ViewData["Budget"] = budgetAmount;
+                                budget = budgetAmount;
                             } else
                             {
                                 ViewData["Budget"] = "Not set";
@@ -89,6 +93,8 @@ namespace FinanceManagementApp.Controllers
                                 int incomeId = incomeReader.GetInt32(0);
                                 string incomeDescription = incomeReader.GetString(1);
                                 double incomeAmount = incomeReader.GetDouble(2);
+
+                                incomesTotal += incomeAmount;
 
                                 incomes.Add(new Income
                                 {
@@ -116,6 +122,8 @@ namespace FinanceManagementApp.Controllers
                                 string expenseDescription = expenseReader.GetString(1);
                                 double expenseAmount = expenseReader.GetDouble(2);
 
+                                expensesTotal += expenseAmount;
+
                                 expenses.Add(new Expense
                                 {
                                     Id = expenseId,
@@ -127,6 +135,19 @@ namespace FinanceManagementApp.Controllers
                             ViewData["Expenses"] = expenses;
                         }
                     }
+                }
+
+                if (expensesTotal > incomesTotal)
+                {
+                    ViewData["Info"] = "Your expenses are exceeding your income by £" + (expensesTotal - incomesTotal);
+                } 
+                else if (expensesTotal > budget)
+                {
+                    ViewData["Info"] = "You are overbudget by £" + (expensesTotal - budget);
+                }
+                else
+                {
+                    ViewData["Info"] = "You are within budget";
                 }
             }
             catch (Exception ex)
