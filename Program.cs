@@ -80,6 +80,11 @@ namespace FinanceManagementApp
                 pattern: "passcoderequestform",
                 defaults: new { controller = "Login", action = "PasscodeRequestForm" });
 
+            app.MapControllerRoute(
+                name: "financeyearlyreport",
+                pattern: "financereport/financeyearlyreport",
+                defaults: new { controller = "FinanceReport", action = "FinanceReportView" });
+
             app.Run();
         }
     }

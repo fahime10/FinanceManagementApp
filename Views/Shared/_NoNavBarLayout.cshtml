@@ -20,10 +20,13 @@
                                 <button type="submit" class="nav-link btn btn-danger">Logout</button>
                             </form>
                         </li>
-                        <li class="nav-item" style="margin-left: 1rem">
+                        <li class="nav-item" style="margin-left: 2rem">
                             <form action="@Url.Action("EditUserForm", "User")" method="POST">
-                                <button type="submit" class="nav-link btn btn-light">Edit profile</button>
+                                <button type="submit" class="nav-link btn btn-secondary">Edit profile</button>
                             </form>
+                        </li>
+                        <li class="nav-item" style="margin-left: 2rem">
+                            <a href="@Url.Action("FinanceReportView", "FinanceReport")" class="nav-link btn btn-info">View yearly reports</a>
                         </li>
                     </ul>
                 </div>

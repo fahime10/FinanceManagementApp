@@ -1,0 +1,76 @@
+﻿@model Dictionary<int, FinanceManagementApp.Models.FinanceReport>
+
+@{
+    ViewData["Title"] = "Yearly report";
+    Layout = "~/Views/Shared/_NoNavbarLayout.cshtml";
+}
+
+<h2>Yearly report</h2>
+<div class="container text-center">
+    @foreach (var entry in Model)
+    {
+        int month = entry.Key;
+        FinanceManagementApp.Models.FinanceReport report = entry.Value;
+
+        <div class="card my-3">
+            <div class="card-header">
+                <h3>@System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(month)</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4>Incomes</h4>
+                        @if (report.Incomes != null && report.Incomes.Count > 0)
+                        {
+                            <ul class="list-group">
+                                @foreach (var income in report.Incomes)
+                                {
+                                    <li class="list-group-item">
+                                        <strong>@income.Description:</strong> @income.Amount.ToString("C")
+                                    </li>
+                                }
+                            </ul>
+                        } 
+                        else
+                        {
+                            <p>No incomes recorded for this month.</p>
+                        }
+                    </div>
+                    <div class="col-md-4">
+                        <h4>Expenses</h4>
+                        @if (report.Expenses != null && report.Expenses.Count > 0)
+                        {
+                            <ul class="list-group">
+                                @foreach (var expense in report.Expenses)
+                                {
+                                    <li class="list-group-item">
+                                        <strong>@expense.Description:</strong> @expense.Amount.ToString("C")
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No expenses recorded for this month.</p>
+                        }
+                    </div>
+                    <div class="col-md-4">
+                        <h4>Budget</h4>
+                        @if (report.Budget != null)
+                        {
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <strong>Monthly budget:</strong> @report.Budget.Amount.ToString("C")
+                                </li>
+                            </ul>
+                        }
+                        else
+                        {
+                            <p>No budget recorded for this month.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
