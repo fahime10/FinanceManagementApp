@@ -141,7 +141,7 @@ namespace FinanceManagementApp.Controllers
                 {
                     ViewData["Info"] = "Your expenses are exceeding your income by £" + (expensesTotal - incomesTotal);
                 } 
-                else if (expensesTotal > budget)
+                else if (expensesTotal > budget && budget != 0)
                 {
                     ViewData["Info"] = "You are overbudget by £" + (expensesTotal - budget);
                 }
@@ -176,7 +176,7 @@ namespace FinanceManagementApp.Controllers
                 {
                     connection.Open();
 
-                    string deleteIncomeQuery = "DELETE FROM incomes WHERE income_id = @income_id;";
+                    string deleteIncomeQuery = "DELETE FROM incomes WHERE income_id=@income_id;";
 
                     using (SqlCommand command = new SqlCommand(deleteIncomeQuery, connection))
                     {
@@ -213,7 +213,7 @@ namespace FinanceManagementApp.Controllers
                 {
                     connection.Open();
 
-                    string deleteExpenseQuery = "DELETE FROM expenses WHERE expense_id = @expense_id;";
+                    string deleteExpenseQuery = "DELETE FROM expenses WHERE expense_id=@expense_id;";
 
                     using (SqlCommand command = new SqlCommand(deleteExpenseQuery, connection))
                     {
@@ -250,7 +250,7 @@ namespace FinanceManagementApp.Controllers
                 {
                     connection.Open();
 
-                    string deleteBudgetQuery = "DELETE FROM budgets WHERE budget_id = @budget_id;";
+                    string deleteBudgetQuery = "DELETE FROM budgets WHERE budget_id=@budget_id;";
 
                     using (SqlCommand command = new SqlCommand(deleteBudgetQuery, connection))
                     {

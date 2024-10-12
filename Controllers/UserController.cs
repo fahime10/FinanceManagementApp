@@ -131,5 +131,47 @@ namespace FinanceManagementApp.Controllers
                 return View("~/Views/App/EditUserForm.cshtml", user);
             }
         }
+
+        [HttpPost("deleteuser")]
+        public IActionResult DeleteUser(int id)
+        {
+            string jwtToken = Request.Cookies["jwtToken"];
+            bool isTokenValid = _handleToken.IsTokenValid(jwtToken);
+
+            if (!isTokenValid)
+            {
+                return RedirectToAction("Login", "Login");
+            }
+
+            try
+            {
+                string connectionString = _configuration["ConnectionStrings:DefaultConnection"];
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string deleteUserQuery = "DELETE FROM users WHERE user_id=@user_id;";
+
+                    using (SqlCommand command = new SqlCommand(deleteUserQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@user_id", id);
+
+                        int rowsAffected = command.ExecuteNonQuery();
+
+                        if (rowsAffected > 0)
+                        {
+                            Response.Cookies.Delete("jwtToken");
+                            return RedirectToAction("Index", "Home");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = "Error deleting user: " + ex.Message;
+            }
+            return RedirectToAction("FinanceOverview");
+        }
     }
 }

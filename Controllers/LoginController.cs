@@ -191,7 +191,7 @@ namespace FinanceManagementApp.Controllers
 
                     string findUserQuery = "SELECT TOP 1 user_id " +
                                            "FROM users " +
-                                           "WHERE user_email_address=@email_address;";
+                                           "WHERE user_email_address = @email_address;";
 
                     using (SqlCommand findUserCommand = new SqlCommand(findUserQuery, connection))
                     {
@@ -208,8 +208,8 @@ namespace FinanceManagementApp.Controllers
                                 string passcode = GenerateRandomCode(8);
 
                                 string insertPasscodeQuery = "UPDATE users " +
-                                                             "SET user_passcode=@passcode " +
-                                                             "WHERE user_id=@user_id;";
+                                                             "SET user_passcode = @passcode " +
+                                                             "WHERE user_id = @user_id;";
 
                                 using (SqlCommand insertPasscodeCommand = new SqlCommand(insertPasscodeQuery, connection))
                                 {
@@ -290,8 +290,8 @@ namespace FinanceManagementApp.Controllers
 
                     string verifyPasscodeQuery = "SELECT TOP 1 user_id " +
                                                  "FROM users " +
-                                                 "WHERE user_email_address=@email_address " +
-                                                 "AND user_passcode=@passcode;";
+                                                 "WHERE user_email_address = @email_address " +
+                                                 "AND user_passcode = @passcode;";
 
                     using (SqlCommand verifyPasscodeCommand = new SqlCommand(verifyPasscodeQuery, connection))
                     {
@@ -303,8 +303,8 @@ namespace FinanceManagementApp.Controllers
                             if (reader.Read())
                             {
                                 string resetPasswordQuery = "UPDATE users " +
-                                                            "SET user_password=@password " +
-                                                            "WHERE user_email_address=@email_address";
+                                                            "SET user_password = @password " +
+                                                            "WHERE user_email_address = @email_address";
 
                                 reader.Close();
 

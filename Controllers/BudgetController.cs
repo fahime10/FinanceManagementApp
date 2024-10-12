@@ -148,8 +148,8 @@ namespace FinanceManagementApp.Controllers
                         else
                         {
                             string setBudgetQuery = "UPDATE budgets " +
-                                                    "SET budget_amount=@amount " +
-                                                    "WHERE user_id=@user_id " +
+                                                    "SET budget_amount = @amount " +
+                                                    "WHERE user_id = @user_id " +
                                                     "AND MONTH(budget_created_at) = MONTH(GETDATE()) " +
                                                     "AND YEAR(budget_created_at) = YEAR(GETDATE());";
 

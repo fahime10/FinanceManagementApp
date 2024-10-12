@@ -118,8 +118,8 @@ namespace FinanceManagementApp.Controllers
 
                     string findExpenseQuery = "SELECT TOP 1 expense_description, expense_amount " +
                                              "FROM expenses " +
-                                             "WHERE expense_id=@expense_id " +
-                                             "AND user_id=@user_id " +
+                                             "WHERE expense_id = @expense_id " +
+                                             "AND user_id = @user_id " +
                                              "AND MONTH(transaction_date) = MONTH(GETDATE()) " +
                                              "AND YEAR(transaction_date) = YEAR(GETDATE());";
 
@@ -193,8 +193,8 @@ namespace FinanceManagementApp.Controllers
                     connection.Open();
 
                     string editExpenseQuery = "UPDATE expenses " +
-                                              "SET expense_description=@description, expense_amount=@amount " +
-                                              "WHERE expense_id=@id;";
+                                              "SET expense_description = @description, expense_amount = @amount " +
+                                              "WHERE expense_id = @id;";
 
                     using (SqlCommand command = new SqlCommand(editExpenseQuery, connection))
                     {

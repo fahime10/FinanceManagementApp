@@ -43,3 +43,11 @@
         </div>
     </div>
 </form>
+
+<form action="@Url.Action("DeleteUser", "User", new { id = Model.Id })" method="POST" style="display:inline-block;">
+    <div class="row mb-3">
+        <div class="offset-sm-3 col-sm-3 d-grid">
+            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your account?');">Delete account</button>
+        </div>
+    </div>
+</form>

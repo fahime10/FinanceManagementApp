@@ -118,8 +118,8 @@ namespace FinanceManagementApp.Controllers
 
                     string findIncomeQuery = "SELECT TOP 1 income_description, income_amount " +
                                              "FROM incomes " +
-                                             "WHERE income_id=@income_id " +
-                                             "AND user_id=@user_id " +
+                                             "WHERE income_id = @income_id " +
+                                             "AND user_id = @user_id " +
                                              "AND MONTH(transaction_date) = MONTH(GETDATE()) " +
                                              "AND YEAR(transaction_date) = YEAR(GETDATE());";
 
@@ -193,8 +193,8 @@ namespace FinanceManagementApp.Controllers
                     connection.Open();
 
                     string editIncomeQuery = "UPDATE incomes " +
-                                             "SET income_description=@description, income_amount=@amount " +
-                                             "WHERE income_id=@id;";
+                                             "SET income_description = @description, income_amount = @amount " +
+                                             "WHERE income_id = @id;";
 
                     using (SqlCommand command = new SqlCommand(editIncomeQuery, connection))
                     {

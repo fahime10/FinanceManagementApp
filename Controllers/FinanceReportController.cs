@@ -45,8 +45,8 @@ namespace FinanceManagementApp.Controllers
 
                         string findIncomesQuery = "SELECT * " +
                                                   "FROM incomes " +
-                                                  "WHERE user_id=@user_id " +
-                                                  "AND MONTH(transaction_date)=@month " +
+                                                  "WHERE user_id = @user_id " +
+                                                  "AND MONTH(transaction_date) = @month " +
                                                   "AND YEAR(transaction_date) = YEAR(GETDATE());";
 
                         using (SqlCommand findIncomesCommand = new SqlCommand(findIncomesQuery, connection))
@@ -72,8 +72,8 @@ namespace FinanceManagementApp.Controllers
 
                         string findExpensesQuery = "SELECT * " +
                                                    "FROM expenses " +
-                                                   "WHERE user_id=@user_id " +
-                                                   "AND MONTH(transaction_date)=@month " +
+                                                   "WHERE user_id = @user_id " +
+                                                   "AND MONTH(transaction_date) = @month " +
                                                    "AND YEAR(transaction_date) = YEAR(GETDATE());";
 
                         using (SqlCommand findExpenseCommand = new SqlCommand(findExpensesQuery, connection))
@@ -99,8 +99,8 @@ namespace FinanceManagementApp.Controllers
 
                         string findBudgetsQuery = "SELECT * " +
                                                   "FROM budgets " +
-                                                  "WHERE user_id=@user_id " +
-                                                  "AND MONTH(budget_created_at)=@month " +
+                                                  "WHERE user_id = @user_id " +
+                                                  "AND MONTH(budget_created_at) = @month " +
                                                   "AND YEAR(budget_created_at) = YEAR(GETDATE());";
 
                         using (SqlCommand findBudgetCommand = new SqlCommand(findBudgetsQuery, connection))
